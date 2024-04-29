@@ -1,10 +1,11 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { decode } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 const nextAuthOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: 'login',
       name: "credentials",
       credentials: {
         username: { label: "username", type: "text" },
@@ -23,9 +24,22 @@ const nextAuthOptions: NextAuthOptions = {
           }),
         });
         const result = await response.json();
+        console.log(result.ok)
         if (result) {
-          console.log(result)
-          return result;
+          try {
+            const sub = jwt.decode(result.token).sub;
+            const name = jwt.decode(result.token).name;
+            const email = jwt.decode(result.token).email;
+
+            // Aqui você precisa adaptar dependendo da estrutura do seu JWT
+            return {
+              id: sub, // O 'sub' geralmente contém o nome de usuário
+              name: name, // Extrai o nome do usuário do token
+              email: email, // Extrai o email do usuário do token
+            };
+          } catch (error) {
+            alert("Error " + error); // Falha na verificação do token
+          }
         }
       },
     }),

@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
 import { useRouter } from 'next/navigation';
+import { Link } from "lucide-react";
 
 const FormSchema = z.object({
   username: z
@@ -38,7 +39,7 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
-    const result = await signIn('credentials', {
+    const result = await signIn('login', {
       username: values.username,
       password: values.password,
       redirect: false
@@ -47,7 +48,7 @@ export default function LoginPage() {
     if (result?.error) {
       alert("Login Failed: " + result.error);
     } else {
-      router.push('/auth/register');
+      router.replace('/');
     }
   }
 
@@ -89,6 +90,12 @@ export default function LoginPage() {
           />
           <Button type="submit">Login</Button>
         </form>
+        <div className="mt-6 text-center text-sm">
+        Não possiu uma conta?
+        <a className="font-medium underline " href="/auth/register">
+          Cadastre-se
+        </a>
+      </div>
       </Form>
     </div>
   );

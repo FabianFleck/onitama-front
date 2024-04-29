@@ -10,7 +10,7 @@ export default async function HomePage() {
   }
   return (
     <div>
-      <h1>Welcome to the Home Page</h1>
+      <h1>Bem vindo {session.token}</h1>
     </div>
   );
 }
