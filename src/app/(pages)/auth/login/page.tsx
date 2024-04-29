@@ -14,10 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "@/components/ui/use-toast";
-import { apiClientWithToken } from "@/lib/axios";
-import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useRouter } from 'next/navigation';
 
 const FormSchema = z.object({
   username: z
@@ -30,7 +28,7 @@ const FormSchema = z.object({
 });
 
 export default function LoginPage() {
-  const router = useRouter()
+  const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -40,18 +38,17 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
-    const response = await signIn('credentials', {
+    const result = await signIn('credentials', {
       username: values.username,
       password: values.password,
       redirect: false
     });
 
-    if (response?.error) {
-      console.log(response.error);
-      return
+    if (result?.error) {
+      alert("Login Failed: " + result.error);
+    } else {
+      router.push('/');
     }
-
-    router.replace('/battle')
   }
 
   return (

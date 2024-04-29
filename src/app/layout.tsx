@@ -17,8 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-500 text-black`}>{children}</body>
-      <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
+      <body className={`${inter.className} bg-slate-500 text-black`}><NextAuthSessionProvider>{children}</NextAuthSessionProvider></body>
     </html>
   );
 }
