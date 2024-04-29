@@ -47,7 +47,7 @@ export default function LoginPage() {
     if (result?.error) {
       alert("Login Failed: " + result.error);
     } else {
-      router.push('/');
+      router.push('/auth/register');
     }
   }
 

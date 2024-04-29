@@ -51,7 +51,7 @@ export default function RegisterPage() {
         </Button>
       </form>
       <div className="mt-6 text-center text-sm">
-        Have an account?
+        Ja possui uma conta?
         <Link className="font-medium underline underline-offset-4" href="/auth/login">
           Login
         </Link>

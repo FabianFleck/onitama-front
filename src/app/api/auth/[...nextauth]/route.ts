@@ -1,5 +1,6 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { decode } from "jsonwebtoken";
 
 const nextAuthOptions: NextAuthOptions = {
   providers: [
@@ -21,16 +22,24 @@ const nextAuthOptions: NextAuthOptions = {
             password: credentials?.password,
           }),
         });
-        const user = await response.json();
-
-        if (user && response.ok) {
-          return user;
+        const result = await response.json();
+        if (result) {
+          console.log(result)
+          return result;
         }
-
-        return null;
       },
     }),
   ],
+  callbacks: {
+    async jwt({ token, user }) {
+      user && (token.user = user);
+      return token;
+    },
+    async session({ session, token }) {
+      session = token.user as any;
+      return session;
+    },
+  },
   pages: {
     signIn: "/auth/login",
   },
