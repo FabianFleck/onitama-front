@@ -5,6 +5,7 @@ import { SessionProvider } from "next-auth/react";
 import NextAuthSessionProvider from "./providers/sessionProvider";
 import { getServerSession } from "next-auth";
 import { nextAuthOptions } from "./api/auth/[...nextauth]/route";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +21,15 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-slate-500 text-black`}>
-        {children}
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

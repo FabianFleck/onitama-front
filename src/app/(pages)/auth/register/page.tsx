@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { apiClientWithToken } from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react"; 
-import { Alert } from "@/components/ui/alert";
+import Alert from '@mui/material/Alert';
 
 const FormSchema = z
   .object({
@@ -47,6 +47,7 @@ const FormSchema = z
 
 export default function RegisterPage() {
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -73,7 +74,7 @@ export default function RegisterPage() {
       });
 
       if(response.status === 201) {
-        alert("Usuário cadastrado com sucesso")
+        setSuccessMessage("Usuário cadastrado com sucesso")
         router.replace("/auth/login");
       }
       // Adicional: Redirecionar para a página de login ou dashboard
@@ -88,7 +89,8 @@ export default function RegisterPage() {
     <div>
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Criar conta</h1>
-        {errorMessage && <Alert variant="destructive">{errorMessage}</Alert>}
+        {successMessage && <Alert severity="success">{successMessage}</Alert>}
+        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       </div>
       <Form {...form}>
         <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
@@ -172,7 +174,7 @@ export default function RegisterPage() {
         <div className="mt-6 text-center text-sm">
           Já possiu uma conta?
           <a className="font-medium underline " href="/auth/login">
-            Entrar
+            <p>Entrar</p>
           </a>
         </div>
       </Form>

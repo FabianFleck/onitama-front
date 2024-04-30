@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
+import Alert from '@mui/material/Alert';
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,9 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react"; 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { useState } from "react";
 
 const FormSchema = z.object({
   username: z
@@ -62,7 +61,7 @@ export default function LoginPage() {
     <div>
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Login</h1>
-        {errorMessage && <Alert variant="destructive">{errorMessage}</Alert>}
+        {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       </div>
       <Form {...form}>
         <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
@@ -99,7 +98,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center text-sm">
           Não possiu uma conta?
           <a className="font-medium underline " href="/auth/register">
-            Cadastre-se
+            <p>Cadastre-se</p>
           </a>
         </div>
       </Form>

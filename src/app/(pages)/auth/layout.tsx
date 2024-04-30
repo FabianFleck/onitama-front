@@ -12,7 +12,7 @@ export default function AuthLayout({
 }>) {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-[url('/subtle-pattern.svg')] bg-cover bg-center bg-no-repeat px-4 md:px-6">
-      <div className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-950">
+      <div className="w-full max-w-md rounded-lg border border-gray-200 p-6 shadow-lg">
         {children}
       </div>
     </div>
