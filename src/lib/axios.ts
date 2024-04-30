@@ -16,7 +16,6 @@ export function apiClientWithToken(token?: string) {
             if (!config.headers['Authorization'] && token) {
                 config.headers['Authorization'] = `Bearer ${accessToken}`
             }
-            console.log(config.headers)
             return config
         }
     )

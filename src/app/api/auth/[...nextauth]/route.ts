@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const nextAuthOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      id: 'login',
+      id: "login",
       name: "credentials",
       credentials: {
         username: { label: "username", type: "text" },
@@ -24,8 +24,7 @@ const nextAuthOptions: NextAuthOptions = {
           }),
         });
         const result = await response.json();
-        console.log(result.ok)
-        if (result) {
+        if (result?.token) {
           try {
             const sub = jwt.decode(result.token).sub;
             const name = jwt.decode(result.token).name;
@@ -38,8 +37,11 @@ const nextAuthOptions: NextAuthOptions = {
               email: email, // Extrai o email do usuário do token
             };
           } catch (error) {
-            alert("Error " + error); // Falha na verificação do token
+            throw new Error("Failed to decode the token.");
           }
+        } else {
+          console.log("Erro ao gerat roken");
+          throw new Error(result.errors[0] || "Login failed."); // Returning the error from your backend or a generic error
         }
       },
     }),

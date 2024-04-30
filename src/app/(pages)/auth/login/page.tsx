@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
-import { useRouter } from 'next/navigation';
-import { Link } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react"; 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const FormSchema = z.object({
   username: z
@@ -30,6 +32,8 @@ const FormSchema = z.object({
 
 export default function LoginPage() {
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -39,16 +43,18 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
-    const result = await signIn('login', {
+    setLoading(true);
+    const result = await signIn("login", {
       username: values.username,
       password: values.password,
-      redirect: false
+      redirect: false,
     });
 
     if (result?.error) {
-      alert("Login Failed: " + result.error);
+      setLoading(false);
+      setErrorMessage(result.error); // Definindo a mensagem de erro
     } else {
-      router.replace('/');
+      router.replace("/");
     }
   }
 
@@ -56,9 +62,7 @@ export default function LoginPage() {
     <div>
       <div className="mb-6 text-center">
         <h1 className="text-3xl font-bold tracking-tight">Login</h1>
-        <p className="mt-2 text-black dark:text-gray-400">
-          Sign in to your account
-        </p>
+        {errorMessage && <Alert variant="destructive">{errorMessage}</Alert>}
       </div>
       <Form {...form}>
         <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
@@ -88,14 +92,16 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
-          <Button type="submit">Login</Button>
+          <Button className="w-full" type="submit">
+            {loading ? "Carregando..." : "Login"}
+          </Button>
         </form>
         <div className="mt-6 text-center text-sm">
-        Não possiu uma conta?
-        <a className="font-medium underline " href="/auth/register">
-          Cadastre-se
-        </a>
-      </div>
+          Não possiu uma conta?
+          <a className="font-medium underline " href="/auth/register">
+            Cadastre-se
+          </a>
+        </div>
       </Form>
     </div>
   );
