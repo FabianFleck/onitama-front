@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 const FormSchema = z.object({
   username: z
@@ -42,6 +42,7 @@ export default function LoginPage() {
   });
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
+    <Suspense fallback={<>Loading...</>}></Suspense>
     setLoading(true);
     const result = await signIn("login", {
       username: values.username,
@@ -53,7 +54,7 @@ export default function LoginPage() {
       setLoading(false);
       setErrorMessage(result.error); // Definindo a mensagem de erro
     } else {
-      router.replace("/");
+      router.replace("/battle");
     }
   }
 

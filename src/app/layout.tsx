@@ -1,11 +1,8 @@
+import { ModeToggle } from "@/components/mode-toggle";
+import { ThemeProvider } from "@/components/theme-provider";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "next-auth/react";
-import NextAuthSessionProvider from "./providers/sessionProvider";
-import { getServerSession } from "next-auth";
-import { nextAuthOptions } from "./api/auth/[...nextauth]/route";
-import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,6 +26,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <ModeToggle />
         </ThemeProvider>
       </body>
     </html>

@@ -30,11 +30,11 @@ const nextAuthOptions: NextAuthOptions = {
             const name = jwt.decode(result.token).name;
             const email = jwt.decode(result.token).email;
 
-            // Aqui você precisa adaptar dependendo da estrutura do seu JWT
             return {
-              id: sub, // O 'sub' geralmente contém o nome de usuário
-              name: name, // Extrai o nome do usuário do token
-              email: email, // Extrai o email do usuário do token
+              id: sub, 
+              name: name, 
+              email: email, 
+              token: result.token
             };
           } catch (error) {
             throw new Error("Failed to decode the token.");
