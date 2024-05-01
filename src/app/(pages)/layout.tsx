@@ -11,6 +11,7 @@ import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { nextAuthOptions } from "../api/auth/[...nextauth]/route";
+import { signOut } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Onitama",
@@ -23,7 +24,6 @@ export default async function PagesLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(nextAuthOptions);
-  console.log(session);
   if (!session) {
     redirect("/auth/login");
   }

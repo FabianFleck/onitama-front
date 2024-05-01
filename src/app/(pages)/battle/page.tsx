@@ -4,7 +4,6 @@ import BattleList from "./battle-list";
 
 export default async function HomePage() {
   const session = await getServerSession(nextAuthOptions);
-  console.log(session);
 
   return (
     <div>
