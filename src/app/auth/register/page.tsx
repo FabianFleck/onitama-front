@@ -23,7 +23,7 @@ const FormSchema = z
   .object({
     name: z
       .string()
-      .regex(/^[A-Za-z]+$/i, "Somente letras são permitidas")
+      .regex(/^[A-Za-z]+(?: [A-Za-z]+)*$/i, "Somente letras são permitidas")
       .min(2, {
         message: "O nome de usuário deve ter pelo menos 2 caracteres",
       }),
@@ -33,7 +33,7 @@ const FormSchema = z
       .email({ message: "Endereço de email inválido" }),
     username: z
       .string()
-      .regex(/^[A-Za-z]+$/i, "Somente letras são permitidas")
+      .regex(/^[A-Za-z._0-9]+$/i, "Formato inválido")
       .min(2, {
         message: "O username deve ter pelo menos 2 caracteres",
       }),
