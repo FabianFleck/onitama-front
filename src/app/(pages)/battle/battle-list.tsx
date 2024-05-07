@@ -53,8 +53,18 @@ export default function BattleList() {
       },
       onmessage(event) {
         const newBattle = JSON.parse(event.data);
-        console.log(newBattle);
-        setBattles((currentBattles) => [...currentBattles, newBattle]);
+        setBattles((currentBattles) => {
+          const index = currentBattles.findIndex(
+            (b) => b.id === newBattle.id
+          );
+          if (index > -1) {
+            const updatedBattles = [...currentBattles];
+            updatedBattles[index] = newBattle;
+            return updatedBattles;
+          } else {
+            return [...currentBattles, newBattle];
+          }
+        });
       },
       onerror(err) {
         console.error("EventSource error:", err);
