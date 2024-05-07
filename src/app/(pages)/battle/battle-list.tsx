@@ -10,8 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { apiClientWithToken } from "@/lib/axios";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { getSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+
+const serverBaseURL = "http://localhost:8088";
 
 interface Battle {
   id: string;
@@ -24,19 +27,52 @@ export default function BattleList() {
   const [battles, setBattles] = useState<Battle[]>([]);
   const [session, setSession] = useState(null);
 
+  const initBattles = async (token) => {
+    console.log(token);
+    const client = apiClientWithToken(token);
+    const response = await client.get<Battle[]>("/api/battle");
+    setBattles(response.data);
+  };
+
+  const fetchData = useCallback(async (token) => {
+    await fetchEventSource(`${serverBaseURL}/api/battle/stream-battles`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      onopen(response) {
+        if (
+          !response.ok &&
+          response.status >= 400 &&
+          response.status < 500 &&
+          response.status !== 429
+        ) {
+          // handle client errors
+          throw new Error("Client error: " + response.status);
+        }
+      },
+      onmessage(event) {
+        const newBattle = JSON.parse(event.data);
+        console.log(newBattle);
+        setBattles((currentBattles) => [...currentBattles, newBattle]);
+      },
+      onerror(err) {
+        console.error("EventSource error:", err);
+      },
+    });
+  }, []);
+
   useEffect(() => {
-    const fetchSessionAndData = async () => {
+    const init = async () => {
       const session = await getSession();
-      setSession(session);
       if (session) {
-        const client = apiClientWithToken(session.token);
-        const response = await client.get<Battle[]>("/api/battle");
-        setBattles(response.data);
+        setSession(session);
+        initBattles(session.token);
+        fetchData(session.token);
       }
     };
-
-    fetchSessionAndData();
-  }, []);
+    init();
+  }, [fetchData]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -49,10 +85,10 @@ export default function BattleList() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead>Jogador 1</TableHead>
-                <TableHead>Jogador 2</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead className="font-medium text-center">Jogador 1</TableHead>
+                <TableHead className="font-medium text-center">Jogador 2</TableHead>
+                <TableHead className="font-medium text-center">Status</TableHead>
+                <TableHead className="font-medium text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -61,14 +97,14 @@ export default function BattleList() {
                 return (
                   <TableRow key={battle.id}>
                     <TableCell className="font-medium">{battle.id}</TableCell>
-                    <TableCell>{battle.playerOne}</TableCell>
-                    <TableCell>{battle.playerTwo}</TableCell>
-                    <TableCell>
+                    <TableCell className="font-medium text-center">{battle.playerOne}</TableCell>
+                    <TableCell className="font-medium text-center">{battle.playerTwo}</TableCell>
+                    <TableCell className="font-medium text-center">
                       <Badge className={status.className} variant="outline">
                         {status.label}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="font-medium text-center">
                       <Button size="icon" variant="ghost">
                         <EyeIcon className="h-4 w-4" />
                         <span className="sr-only">View battle</span>

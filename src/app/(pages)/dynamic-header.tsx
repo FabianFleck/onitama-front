@@ -51,7 +51,7 @@ export default function PagesHeader({ session }) {
   }
 
   const avatarConfig = stringAvatar(username);
-  console.log(avatarConfig);
+  // console.log(avatarConfig);
 
   return (
     <header className="flex h-20 w-full shrink-0 items-center px-4 shadow-md">
