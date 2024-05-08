@@ -9,9 +9,11 @@ import { ToastContainer, toast } from "react-toastify";
 export default function PagesLayout({ children }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [session, setSession] = useState(null);
+  const theme = localStorage.getItem('theme') 
 
   useEffect(() => {
     async function loadSession() {
+      console.log(theme)
       const sessionData = await getSession();
       if (!sessionData) {
         redirect("/auth/login");
@@ -37,6 +39,7 @@ export default function PagesLayout({ children }) {
           hideProgressBar: false,
           pauseOnHover: true,
           progress: undefined,
+          theme: theme ? theme : "light",
         }
       );
     }
