@@ -1,20 +1,53 @@
-import { getServerSession } from "next-auth";
-import { redirect } from 'next/navigation';
-import { nextAuthOptions } from "../api/auth/[...nextauth]/route";
-import dynamic from "next/dynamic";
+"use client";
+import { getSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { BattleCreate } from "./battle/battle-create"; 
+import PagesHeader from "./dynamic-header";
+import { ToastContainer, toast } from "react-toastify";
 
-const DynamicHeader = dynamic(() => import('./dynamic-header'), { ssr: false });
+export default function PagesLayout({ children }) {
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [session, setSession] = useState(null);
 
-export default async function PagesLayout({ children }) {
-  const session = await getServerSession(nextAuthOptions);
-  if (!session) {
-    redirect("/auth/login");
-  }
+  useEffect(() => {
+    async function loadSession() {
+      const sessionData = await getSession();
+      if (!sessionData) {
+        redirect("/auth/login");
+      }
+      setSession(sessionData);
+    }
+
+    loadSession();
+  }, []);
+
+  const handleModalClose = (result?) => {
+    setModalOpen(false);
+    if (result) {
+      toast(
+        <div>
+          <strong>{result.message}</strong>
+          <div>{result.info}</div>
+        </div>,
+        {
+          type: result.type,
+          position: "top-right",
+          autoClose: 10000,
+          hideProgressBar: false,
+          pauseOnHover: true,
+          progress: undefined,
+        }
+      );
+    }
+  };
 
   return (
     <div>
-      <DynamicHeader session={session}/>
+      <ToastContainer />
+      {session && <PagesHeader session={session} setModalOpen={setModalOpen} />}
       {children}
+      {isModalOpen && <BattleCreate onClose={handleModalClose} />}
     </div>
   );
 }
