@@ -7,17 +7,23 @@ import Board from "./board";
 import PlayerCards from "./card";
 
 const GamePage = () => {
+  // PATH AND ROUTER
   const router = useRouter();
   const searchParams = useSearchParams();
+  const battleId = searchParams.get("battleId") ?? "";
+
+  // TABLE AND GAME
+  const [tableCard, setTableCard] = useState(null);
+  const [errors, setErrors] = useState(null);
   const [board, setBoard] = useState([]);
   const [session, setSession] = useState(null);
   const [game, setGame] = useState(null);
+
+  // YOUR PLAYER
   const [playerType, setPlayerType] = useState(null);
   const [yourPlayer, setYourPlayer] = useState(null);
+  const [selectCard, setSelectCard] = useState(null);
   const [yourCards, setYourCards] = useState(null);
-  const [tableCard, setTableCard] = useState(null);
-  const [errors, setErrors] = useState(null);
-  const battleId = searchParams.get("battleId") ?? "";
 
   useEffect(() => {
     if (yourPlayer) {
@@ -73,10 +79,10 @@ const GamePage = () => {
   }, [session]);
 
   const initGame = async () => {
-    const client = apiClientWithToken(session.token);
     if (!battleId) {
       router.push("/battle");
     }
+    const client = apiClientWithToken(session.token);
     try {
       const response = await client.get("/api/battle/" + battleId);
       if (response.data) {
@@ -108,14 +114,64 @@ const GamePage = () => {
   };
 
   const handleCellClick = (line, column) => {
-    const updatedBoard = board.map((row) =>
+    board.map((row) =>
       row.map((cell) =>
-        cell.line === line && cell.column === column
-          ? { ...cell, state: playerType }
+        cell.line === line &&
+        cell.column === column &&
+        cell.color === yourPlayer.color &&
+        selectCard &&
+        cell.state
+          ? getPossibleMoviments(line, column, yourPlayer.id, selectCard)
           : cell
       )
     );
-    setBoard(updatedBoard);
+  };
+
+  const getPossibleMoviments = async (line, column, playerId, cardId) => {
+    const client = apiClientWithToken(session.token);
+    try {
+      const response = await client.get("/api/movement/possible", {
+        params: {
+          line: line,
+          column: column,
+          playerId: playerId,
+          cardId,
+        },
+      });
+      highlightPossibleMoves(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const highlightPossibleMoves = (moves) => {
+    const newBoard = board.map((row) =>
+      row.map((cell) => ({
+        ...cell,
+        highlight: moves.some(
+          (move) => move.line === cell.line && move.column === cell.column
+        ),
+      }))
+    );
+    clearHighlights();
+    setBoard(newBoard);
+  };
+
+  const handleCardClick = (cardId) => {
+    if (
+      cardId &&
+      (cardId === yourPlayer.card1.id || cardId === yourPlayer.card2.id)
+    ) {
+      setSelectCard(cardId);
+      clearHighlights();
+    }
+  };
+
+  const clearHighlights = () => {
+    const clearedBoard = board.map((row) =>
+      row.map((cell) => ({ ...cell, highlight: false }))
+    );
+    setBoard(clearedBoard);
   };
 
   return (
@@ -131,11 +187,19 @@ const GamePage = () => {
       <Board board={board} onCellClick={handleCellClick} />
 
       {tableCard && (
-        <PlayerCards cards={[tableCard]} playerName="Carta da mesa" />
+        <PlayerCards
+          cards={[tableCard]}
+          playerName="Carta da mesa"
+          onCardClick={handleCardClick}
+        />
       )}
 
       {yourCards && (
-        <PlayerCards cards={yourCards} playerName={yourPlayer.user.name} />
+        <PlayerCards
+          cards={yourCards}
+          playerName={yourPlayer.user.name}
+          onCardClick={handleCardClick}
+        />
       )}
     </div>
   );

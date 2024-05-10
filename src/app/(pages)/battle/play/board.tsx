@@ -12,6 +12,7 @@ const Board = ({ board, onCellClick }) => {
               key={`${rowIndex}-${cellIndex}`}
               value={cell}
               onClick={() => onCellClick(cell.line, cell.column)}
+              isClickable={cell.state || cell.highlight}
             />
           ))
         )}
