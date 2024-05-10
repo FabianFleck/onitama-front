@@ -1,28 +1,35 @@
 "use client";
 import { getSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BattleCreate } from "./battle/battle-create"; 
+import { BattleCreate } from "./battle/battle-create";
 import PagesHeader from "./dynamic-header";
 import { ToastContainer, toast } from "react-toastify";
+import { useTheme } from "next-themes"
 
 export default function PagesLayout({ children }) {
   const [isModalOpen, setModalOpen] = useState(false);
   const [session, setSession] = useState(null);
-  const theme = localStorage.getItem('theme') 
+  const { theme } = useTheme()
+  const router = useRouter();
 
   useEffect(() => {
     async function loadSession() {
-      console.log(theme)
-      const sessionData = await getSession();
-      if (!sessionData) {
-        redirect("/auth/login");
+      try {
+        const sessionData = await getSession();
+        if (!sessionData) {
+          router.push("/auth/login"); // Redireciona usando o useRouter
+        } else {
+          setSession(sessionData);
+        }
+      } catch (error) {
+        console.error("Failed to load session", error);
+        router.push("/auth/login"); // Garante redirecionamento em caso de erro
       }
-      setSession(sessionData);
     }
 
     loadSession();
-  }, []);
+  }, [router]);
 
   const handleModalClose = (result?) => {
     setModalOpen(false);
@@ -39,7 +46,7 @@ export default function PagesLayout({ children }) {
           hideProgressBar: false,
           pauseOnHover: true,
           progress: undefined,
-          theme: theme ? theme : "light",
+          theme: theme,
         }
       );
     }

@@ -12,6 +12,7 @@ import {
 import { apiClientWithToken } from "@/lib/axios";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { getSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 const serverBaseURL = "http://localhost:8088";
@@ -26,6 +27,7 @@ interface Battle {
 export default function BattleList() {
   const [battles, setBattles] = useState<Battle[]>([]);
   const [session, setSession] = useState(null);
+  const router = useRouter();
 
   const initBattles = async (token) => {
     console.log(token);
@@ -54,9 +56,7 @@ export default function BattleList() {
       onmessage(event) {
         const newBattle = JSON.parse(event.data);
         setBattles((currentBattles) => {
-          const index = currentBattles.findIndex(
-            (b) => b.id === newBattle.id
-          );
+          const index = currentBattles.findIndex((b) => b.id === newBattle.id);
           if (index > -1) {
             const updatedBattles = [...currentBattles];
             updatedBattles[index] = newBattle;
@@ -84,6 +84,10 @@ export default function BattleList() {
     init();
   }, [fetchData]);
 
+  function handleBattlePlaying(battleId: string) {
+    router.push("/battle/play?battleId=" + battleId);
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1 p-4 md:p-6">
@@ -95,9 +99,15 @@ export default function BattleList() {
             <TableHeader>
               <TableRow>
                 <TableHead>ID</TableHead>
-                <TableHead className="font-medium text-center">Jogador 1</TableHead>
-                <TableHead className="font-medium text-center">Jogador 2</TableHead>
-                <TableHead className="font-medium text-center">Status</TableHead>
+                <TableHead className="font-medium text-center">
+                  Jogador 1
+                </TableHead>
+                <TableHead className="font-medium text-center">
+                  Jogador 2
+                </TableHead>
+                <TableHead className="font-medium text-center">
+                  Status
+                </TableHead>
                 <TableHead className="font-medium text-center">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -106,16 +116,25 @@ export default function BattleList() {
                 const status = getStatus(battle, session.id);
                 return (
                   <TableRow key={battle.id}>
-                    <TableCell className="font-medium">{battle.id}</TableCell>
-                    <TableCell className="font-medium text-center">{battle.playerOne}</TableCell>
-                    <TableCell className="font-medium text-center">{battle.playerTwo}</TableCell>
+                    <TableCell
+                      onClick={() => handleBattlePlaying(battle.id)}
+                      className="font-medium"
+                    >
+                      {battle.id}
+                    </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {battle.playerOne}
+                    </TableCell>
+                    <TableCell className="font-medium text-center">
+                      {battle.playerTwo}
+                    </TableCell>
                     <TableCell className="font-medium text-center">
                       <Badge className={status.className} variant="outline">
                         {status.label}
                       </Badge>
                     </TableCell>
                     <TableCell className="font-medium text-center">
-                      <Button size="icon" variant="ghost">
+                      <Button onClick={() => handleBattlePlaying(battle.id)} size="icon" variant="ghost">
                         <EyeIcon className="h-4 w-4" />
                         <span className="sr-only">View battle</span>
                       </Button>

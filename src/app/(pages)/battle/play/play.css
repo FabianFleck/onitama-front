@@ -1,0 +1,47 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: boarder-box;
+}
+
+.body {
+  display: grid;
+  justify-content: center;
+  text-align: center;
+
+  font-family: sans-serif;
+}
+
+.title {
+  text-align: center;
+  font-size: 3rem;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 140px);
+  grid-template-rows: repeat(5, 140px);
+  gap: 0.5rem;
+}
+
+.cell {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+
+  background-color: #9999;
+  border-radius: 0.5px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: black;
+
+  cursor: pointer;
+}
+
+.cell.RED {
+  background-color: red;
+}
+
+.cell.BLUE {
+  background-color: blue;
+}
