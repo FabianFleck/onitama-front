@@ -20,10 +20,15 @@ const GamePage = () => {
   const [game, setGame] = useState(null);
 
   // YOUR PLAYER
-  const [playerType, setPlayerType] = useState(null);
+  const [playerColor, setPlayerColor] = useState(null);
   const [yourPlayer, setYourPlayer] = useState(null);
   const [selectCard, setSelectCard] = useState(null);
+  const [selectCell, setSelectCell] = useState(null);
   const [yourCards, setYourCards] = useState(null);
+
+  // OPPONENT PLAYER
+  const [opponentPlayer, setOpponentPlayer] = useState(null);
+  const [opponentCards, setOpponentCards] = useState(null);
 
   useEffect(() => {
     if (yourPlayer) {
@@ -36,28 +41,48 @@ const GamePage = () => {
   }, [yourPlayer]);
 
   useEffect(() => {
+    if (opponentPlayer) {
+      setInitParts(opponentPlayer);
+      if (opponentPlayer.card1) {
+        setOpponentCards([opponentPlayer.card1, opponentPlayer.card2]);
+        setTableCard(game.tableCard);
+      }
+    }
+  }, [opponentPlayer]);
+
+  useEffect(() => {
     if (game) {
       setTableCard(game.tableCard);
     }
   }, [game]);
 
   const setInitParts = (player) => {
-    let updatedBoard = board.map((row) => row.map((cell) => ({ ...cell })));
+    setBoard((prevBoard) => {
+      return prevBoard.map((row) =>
+        row.map((cell) => {
+          const isPlayerPart = player.parts.some(
+            (part) =>
+              part.position.line === cell.line &&
+              part.position.column === cell.column
+          );
 
-    player.parts.forEach((part) => {
-      updatedBoard.forEach((row) => {
-        row.forEach((cell) => {
-          if (
-            cell.line === part.position.line &&
-            cell.column === part.position.column
-          ) {
-            cell.state = part.partTypeEnum;
-            cell.color = playerType;
+          if (isPlayerPart) {
+            const part = player.parts.find(
+              (part) =>
+                part.position.line === cell.line &&
+                part.position.column === cell.column
+            );
+
+            return {
+              ...cell,
+              state: part.partTypeEnum,
+              color: player.color,
+            };
           }
-        });
-      });
+          return cell; // Retorna a célula como está se não for uma parte do jogador
+        })
+      );
     });
-    setBoard(updatedBoard);
   };
 
   useEffect(() => {
@@ -91,10 +116,17 @@ const GamePage = () => {
           response.data.player1,
           response.data.player2,
         ].find((p) => p && p.user.username === session.id);
+        const opponentPlayer = [
+          response.data.player1,
+          response.data.player2,
+        ].find((p) => p && p !== currentPlayer);
         if (currentPlayer) {
-          setPlayerType(currentPlayer.color);
+          setPlayerColor(currentPlayer.color);
           setYourPlayer(currentPlayer);
           setBoard(createBoard(currentPlayer.color === "RED"));
+        }
+        if (opponentPlayer) {
+          setOpponentPlayer(opponentPlayer);
         }
       }
     } catch (error) {
@@ -114,17 +146,58 @@ const GamePage = () => {
   };
 
   const handleCellClick = (line, column) => {
-    board.map((row) =>
-      row.map((cell) =>
-        cell.line === line &&
-        cell.column === column &&
-        cell.color === yourPlayer.color &&
-        selectCard &&
-        cell.state
-          ? getPossibleMoviments(line, column, yourPlayer.id, selectCard)
-          : cell
-      )
-    );
+    let clickedCell = null;
+    for (const row of board) {
+      for (const cell of row) {
+        if (cell.line === line && cell.column === column) {
+          clickedCell = cell;
+          break;
+        }
+      }
+      if (clickedCell) break;
+    }
+    if (clickedCell && clickedCell.color === yourPlayer.color && selectCard) {
+      console.log("Obtendo movimentos possíveis...");
+      getPossibleMoviments(line, column, yourPlayer.id, selectCard);
+      setSelectCell({ line, column });
+    } else if (clickedCell && clickedCell.highlight) {
+      // Verificar se a célula é um movimento possível
+      console.log("Realizando movimento...", selectCell.line);
+      moviePart(
+        selectCell.line,
+        selectCell.column,
+        line,
+        column,
+        yourPlayer.id,
+        selectCard
+      );
+    }
+  };
+
+  const moviePart = async (
+    line,
+    column,
+    lineNew,
+    columnNew,
+    playerId,
+    cardId
+  ) => {
+    const client = apiClientWithToken(session.token);
+    try {
+      const response = await client.post("/api/movement", null, {
+        params: {
+          line: line,
+          column: column,
+          lineNew: lineNew,
+          columnNew: columnNew,
+          playerId: playerId,
+          cardId,
+        },
+      });
+      alert("Movimento realizado!");
+    } catch (error) {
+      alert(error.response.data.errors[0]);
+    }
   };
 
   const getPossibleMoviments = async (line, column, playerId, cardId) => {
@@ -175,32 +248,35 @@ const GamePage = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <h1>{errors}</h1>
-      <Board board={board} onCellClick={handleCellClick} />
-
-      {tableCard && (
-        <PlayerCards
-          cards={[tableCard]}
-          playerName="Carta da mesa"
-          onCardClick={handleCardClick}
-        />
-      )}
-
-      {yourCards && (
-        <PlayerCards
-          cards={yourCards}
-          playerName={yourPlayer.user.name}
-          onCardClick={handleCardClick}
-        />
-      )}
+    <div className="grid grid-cols-12 gap-4">
+      <div className="col-span-10 space-y-4">
+        {yourCards && (
+          <PlayerCards
+            cards={opponentCards}
+            playerName={opponentPlayer.user.name}
+            onCardClick={handleCardClick}
+          />
+        )}
+        <h1>{errors}</h1>
+        <Board board={board} onCellClick={handleCellClick} color={playerColor} />
+        {yourCards && (
+          <PlayerCards
+            cards={yourCards}
+            playerName={yourPlayer.user.name}
+            onCardClick={handleCardClick}
+          />
+        )}
+      </div>
+      <div className="col-span-2 flex items-center">
+        {yourCards && (
+          <PlayerCards
+            cards={[tableCard]}
+            playerName="Carta da mesa"
+            onCardClick={handleCardClick}
+            className="flex-col"
+          />
+        )}
+      </div>
     </div>
   );
 };

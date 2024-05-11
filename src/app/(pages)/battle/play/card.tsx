@@ -1,14 +1,14 @@
 import React from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@mui/material";
+import { cn } from "@/lib/utils";
 
-const PlayerCards = ({ cards, playerName, onCardClick }) => {
+const PlayerCards = ({ cards, playerName, onCardClick, className = ""}) => {
   return (
-    <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+    <div className={cn('flex justify-center gap-[20px] mt-3 text-center', className)}>
       <h3>{playerName}</h3>
       {cards.map((card, index) => (
         <Card key={index} className="card-style">
-          {/* Implementação da exibição de card */}
           <Button onClick={() => onCardClick(card.id)}>{card.name}</Button>
         </Card>
       ))}
