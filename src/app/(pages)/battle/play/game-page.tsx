@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Board from "./board";
 import PlayerCards from "./card";
+import { Button } from "@mui/material";
 
 const GamePage = () => {
   // PATH AND ROUTER
@@ -146,6 +147,7 @@ const GamePage = () => {
   };
 
   const handleCellClick = (line, column) => {
+    console.log("linha: ", line, "Coluna: ", column)
     let clickedCell = null;
     for (const row of board) {
       for (const cell of row) {
@@ -211,6 +213,7 @@ const GamePage = () => {
           cardId,
         },
       });
+      console.log("Movimentos: ", response.data)
       highlightPossibleMoves(response.data);
     } catch (error) {
       console.log(error);
@@ -247,6 +250,21 @@ const GamePage = () => {
     setBoard(clearedBoard);
   };
 
+  const cardDistribuite = async () => {
+    const client = apiClientWithToken(session.token);
+    try {
+      const response = await client.post("/api/card/distribute", null, {
+        params: {
+          battleId: battleId,
+        },
+      });
+      alert("Cartas distribuidas!");
+    } catch (error) {
+      console.log(error);
+      alert(error.response.data.errors[0]);
+    }
+  };
+
   return (
     <div className="grid grid-cols-12 gap-4">
       <div className="col-span-10 space-y-4">
@@ -258,7 +276,11 @@ const GamePage = () => {
           />
         )}
         <h1>{errors}</h1>
-        <Board board={board} onCellClick={handleCellClick} color={playerColor} />
+        <Board
+          board={board}
+          onCellClick={handleCellClick}
+          color={playerColor}
+        />
         {yourCards && (
           <PlayerCards
             cards={yourCards}
@@ -268,6 +290,13 @@ const GamePage = () => {
         )}
       </div>
       <div className="col-span-2 flex items-center">
+        {yourPlayer && opponentPlayer && !tableCard ? (
+          <h1>
+            <Button onClick={() => cardDistribuite()}>Dar as cartas</Button>
+          </h1>
+        ) : (
+          <h1></h1>
+        )}
         {yourCards && (
           <PlayerCards
             cards={[tableCard]}
