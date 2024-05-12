@@ -285,6 +285,7 @@ const GamePage = () => {
             cards={yourCards}
             playerName={yourPlayer.name}
             onCardClick={handleCardClick}
+            currentPlayer= {game.currentPlayer === playerColor}
           />
         )}
       </div>
