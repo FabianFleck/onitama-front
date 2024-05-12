@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { BattleCreate } from "./battle/create/battle-create";
 import PagesHeader from "./dynamic-header";
 import { ToastContainer, toast } from "react-toastify";
-import { useTheme } from "next-themes"
+import { useTheme } from "next-themes";
+import { BattleJoin } from "./battle/join/battle-join";
 
 export default function PagesLayout({ children }) {
-  const [isModalOpen, setModalOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState("");
   const [session, setSession] = useState(null);
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,8 +33,10 @@ export default function PagesLayout({ children }) {
   }, [router]);
 
   const handleModalClose = (result?) => {
-    setModalOpen(false);
-    if (result) {
+    if (result.close) {
+      setModalOpen("");
+    }
+    if (result.message) {
       toast(
         <div>
           <strong>{result.message}</strong>
@@ -57,7 +60,8 @@ export default function PagesLayout({ children }) {
       <ToastContainer />
       {session && <PagesHeader session={session} setModalOpen={setModalOpen} />}
       {children}
-      {isModalOpen && <BattleCreate onClose={handleModalClose} />}
+      {isModalOpen === "create" && <BattleCreate onClose={handleModalClose} />}
+      {isModalOpen === "join" && <BattleJoin onClose={handleModalClose} />}
     </div>
   );
 }

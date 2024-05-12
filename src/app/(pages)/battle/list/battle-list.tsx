@@ -117,7 +117,6 @@ export default function BattleList() {
                 return (
                   <TableRow key={battle.id}>
                     <TableCell
-                      onClick={() => handleBattlePlaying(battle.id)}
                       className="font-medium"
                     >
                       {battle.id}

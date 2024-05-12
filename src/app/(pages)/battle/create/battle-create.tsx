@@ -22,7 +22,9 @@ export function BattleCreate({ onClose }) {
       try {
         setLoading(true);
         const client = apiClientWithToken(session.token);
-        const uri = !checked ? "/api/battle?color=RED" : "/api/battle?color=BLUE";
+        const uri = !checked
+          ? "/api/battle?color=RED"
+          : "/api/battle?color=BLUE";
         const response = await client.post(uri);
         console.log(response);
 
@@ -32,6 +34,7 @@ export function BattleCreate({ onClose }) {
             type: "success",
             message: "Batalha criada!",
             info: response.data.id,
+            close: true,
           });
         } else {
           setLoading(false);
@@ -39,6 +42,7 @@ export function BattleCreate({ onClose }) {
             type: "error",
             message: "Erro ao criar a batalha",
             info: error.response.data.errors[0],
+            close: false,
           });
         }
       } catch (error) {
@@ -47,6 +51,7 @@ export function BattleCreate({ onClose }) {
           type: "error",
           message: "Erro ao criar a batalha",
           info: error.response.data.errors[0],
+          close: false,
         });
       }
     }
@@ -79,7 +84,7 @@ export function BattleCreate({ onClose }) {
           </form>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button onClick={() => onClose()} variant="outline">
+          <Button onClick={() => onClose({close: true})} variant="outline">
             Voltar
           </Button>
           <Button onClick={handleCreateClick}>
