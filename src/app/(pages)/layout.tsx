@@ -2,7 +2,7 @@
 import { getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { BattleCreate } from "./battle/battle-create";
+import { BattleCreate } from "./battle/create/battle-create";
 import PagesHeader from "./dynamic-header";
 import { ToastContainer, toast } from "react-toastify";
 import { useTheme } from "next-themes"

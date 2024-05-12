@@ -54,7 +54,7 @@ export default function LoginPage() {
       setLoading(false);
       setErrorMessage(result.error); // Definindo a mensagem de erro
     } else {
-      router.replace("/battle");
+      router.replace("/battle/list");
     }
   }
 

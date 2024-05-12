@@ -76,7 +76,7 @@ const GamePage = () => {
 
             return {
               ...cell,
-              state: part.partTypeEnum,
+              state: part.type,
               color: player.color,
             };
           }
@@ -116,7 +116,7 @@ const GamePage = () => {
         const currentPlayer = [
           response.data.player1,
           response.data.player2,
-        ].find((p) => p && p.user.username === session.id);
+        ].find((p) => p && p.username === session.id);
         const opponentPlayer = [
           response.data.player1,
           response.data.player2,
@@ -147,7 +147,6 @@ const GamePage = () => {
   };
 
   const handleCellClick = (line, column) => {
-    console.log("linha: ", line, "Coluna: ", column)
     let clickedCell = null;
     for (const row of board) {
       for (const cell of row) {
@@ -271,7 +270,7 @@ const GamePage = () => {
         {yourCards && (
           <PlayerCards
             cards={opponentCards}
-            playerName={opponentPlayer.user.name}
+            playerName={opponentPlayer.name}
             onCardClick={handleCardClick}
           />
         )}
@@ -284,7 +283,7 @@ const GamePage = () => {
         {yourCards && (
           <PlayerCards
             cards={yourCards}
-            playerName={yourPlayer.user.name}
+            playerName={yourPlayer.name}
             onCardClick={handleCardClick}
           />
         )}
