@@ -37,7 +37,7 @@ export default function BattleList() {
   };
 
   const fetchData = useCallback(async (token) => {
-    await fetchEventSource(`${serverBaseURL}/api/battle/stream-battles`, {
+    await fetchEventSource(`${serverBaseURL}/api/battle/stream/list`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,

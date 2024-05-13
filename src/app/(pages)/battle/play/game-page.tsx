@@ -2,10 +2,13 @@
 import { apiClientWithToken } from "@/lib/axios";
 import { getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Board from "./board";
 import PlayerCards from "./card";
 import { Button } from "@mui/material";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
+
+const serverBaseURL = "http://localhost:8088";
 
 const GamePage = () => {
   // PATH AND ROUTER
@@ -36,7 +39,7 @@ const GamePage = () => {
       setInitParts(yourPlayer);
       if (yourPlayer.card1) {
         setYourCards([yourPlayer.card1, yourPlayer.card2]);
-        setTableCard(game.tableCard);
+        setTableCard(game.tableCard)
       }
     }
   }, [yourPlayer]);
@@ -46,14 +49,28 @@ const GamePage = () => {
       setInitParts(opponentPlayer);
       if (opponentPlayer.card1) {
         setOpponentCards([opponentPlayer.card1, opponentPlayer.card2]);
-        setTableCard(game.tableCard);
       }
     }
   }, [opponentPlayer]);
 
   useEffect(() => {
     if (game) {
-      setTableCard(game.tableCard);
+      console.log("game:", game);
+
+      const currentPlayer = [game.player1, game.player2].find(
+        (p) => p && p.username === session.id
+      );
+      const opponentPlayer = [game.player1, game.player2].find(
+        (p) => p && p !== currentPlayer
+      );
+      if (currentPlayer) {
+        setPlayerColor(currentPlayer.color);
+        setYourPlayer(currentPlayer);
+        setBoard(createBoard(currentPlayer.color === "RED"));
+      }
+      if (opponentPlayer) {
+        setOpponentPlayer(opponentPlayer);
+      }
     }
   }, [game]);
 
@@ -101,6 +118,7 @@ const GamePage = () => {
   useEffect(() => {
     if (session) {
       initGame();
+      fetchData(session.token);
     }
   }, [session]);
 
@@ -113,25 +131,8 @@ const GamePage = () => {
       const response = await client.get("/api/battle/" + battleId);
       if (response.data) {
         setGame(response.data);
-        const currentPlayer = [
-          response.data.player1,
-          response.data.player2,
-        ].find((p) => p && p.username === session.id);
-        const opponentPlayer = [
-          response.data.player1,
-          response.data.player2,
-        ].find((p) => p && p !== currentPlayer);
-        if (currentPlayer) {
-          setPlayerColor(currentPlayer.color);
-          setYourPlayer(currentPlayer);
-          setBoard(createBoard(currentPlayer.color === "RED"));
-        }
-        if (opponentPlayer) {
-          setOpponentPlayer(opponentPlayer);
-        }
       }
     } catch (error) {
-      console.log(error.response.data.errors);
       setErrors(error.response.data.errors);
     }
   };
@@ -140,7 +141,7 @@ const GamePage = () => {
     return Array.from({ length: 5 }, (_, i) =>
       Array.from({ length: 5 }, (_, j) => ({
         line: isRed ? 5 - i : i + 1,
-        column: isRed ? 5 - j : j + 1,
+        column: isRed ? j + 1 : 5 - j,
         state: null,
       }))
     );
@@ -158,12 +159,9 @@ const GamePage = () => {
       if (clickedCell) break;
     }
     if (clickedCell && clickedCell.color === yourPlayer.color && selectCard) {
-      console.log("Obtendo movimentos possíveis...");
       getPossibleMoviments(line, column, yourPlayer.id, selectCard);
       setSelectCell({ line, column });
     } else if (clickedCell && clickedCell.highlight) {
-      // Verificar se a célula é um movimento possível
-      console.log("Realizando movimento...", selectCell.line);
       moviePart(
         selectCell.line,
         selectCell.column,
@@ -195,7 +193,6 @@ const GamePage = () => {
           cardId,
         },
       });
-      alert("Movimento realizado!");
     } catch (error) {
       alert(error.response.data.errors[0]);
     }
@@ -212,7 +209,6 @@ const GamePage = () => {
           cardId,
         },
       });
-      console.log("Movimentos: ", response.data)
       highlightPossibleMoves(response.data);
     } catch (error) {
       console.log(error);
@@ -264,6 +260,38 @@ const GamePage = () => {
     }
   };
 
+  const fetchData = useCallback(
+    async (token) => {
+      await fetchEventSource(`${serverBaseURL}/api/battle/stream`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        onopen(response) {
+          if (
+            response.status >= 400 &&
+            response.status < 500 &&
+            response.status !== 429
+          ) {
+            // handle client errors
+            throw new Error("Client error: " + response.status);
+          }
+        },
+        onmessage(event) {
+          const response = JSON.parse(event.data);
+          
+          if (response) {
+            setGame(response);
+          }
+        },
+        onerror(err) {
+          console.error("EventSource error:", err);
+        },
+      });
+    },
+    [session]
+  );
+
   return (
     <div className="grid grid-cols-12 gap-4">
       <div className="col-span-10 space-y-4">
@@ -285,19 +313,19 @@ const GamePage = () => {
             cards={yourCards}
             playerName={yourPlayer.name}
             onCardClick={handleCardClick}
-            currentPlayer= {game.currentPlayer === playerColor}
+            currentPlayer={game.currentPlayer === playerColor}
           />
         )}
       </div>
       <div className="col-span-2 flex items-center">
-        {yourPlayer && opponentPlayer && !tableCard ? (
+        {yourPlayer && opponentPlayer && !game.tableCard ? (
           <h1>
             <Button onClick={() => cardDistribuite()}>Dar as cartas</Button>
           </h1>
         ) : (
           <h1></h1>
         )}
-        {yourCards && (
+        {tableCard && (
           <PlayerCards
             cards={[tableCard]}
             playerName="Carta da mesa"

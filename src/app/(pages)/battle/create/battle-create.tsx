@@ -26,7 +26,6 @@ export function BattleCreate({ onClose }) {
           ? "/api/battle?color=RED"
           : "/api/battle?color=BLUE";
         const response = await client.post(uri);
-        console.log(response);
 
         if (response.status === 200) {
           setLoading(false);
