@@ -19,9 +19,15 @@
 
 .board {
   display: grid;
-  grid-template-columns: repeat(5, 140px);
-  grid-template-rows: repeat(5, 140px);
+  grid-template-columns: repeat(5, 85px);
+  grid-template-rows: repeat(5, 85px);
   gap: 0.5rem;
+}
+
+.board-card {
+  display: grid;
+  grid-template-columns: repeat(1, 220px);
+  grid-template-rows: repeat(1, 125px);
 }
 
 .cell {
@@ -31,7 +37,7 @@
 
   background-color: #9999;
   border-radius: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: bold;
   color: black;
 

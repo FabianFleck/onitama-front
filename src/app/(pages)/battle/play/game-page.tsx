@@ -296,12 +296,12 @@ const GamePage = () => {
 
   return (
     <div className="grid grid-cols-12 gap-4">
-      <div className="col-span-10 space-y-4">
+      <div className="col-span-8 space-y-4">
         {yourCards && (
           <PlayerCards
             cards={opponentCards}
-            playerName={opponentPlayer.name}
             onCardClick={handleCardClick}
+            isInverted={true}
           />
         )}
         <h1>{errors}</h1>
@@ -314,9 +314,8 @@ const GamePage = () => {
         {yourCards && (
           <PlayerCards
             cards={yourCards}
-            playerName={yourPlayer.name}
             onCardClick={handleCardClick}
-            currentPlayer={game.currentPlayer === playerColor && result === "OPEN"}
+            selectCard={selectCard}
           />
         )}
         {result && result != "OPEN" && (
@@ -336,7 +335,6 @@ const GamePage = () => {
         {tableCard && (
           <PlayerCards
             cards={[tableCard]}
-            playerName="Carta da mesa"
             onCardClick={handleCardClick}
             className="flex-col"
           />

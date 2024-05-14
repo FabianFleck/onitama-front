@@ -1,14 +1,11 @@
-import React from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@mui/material";
 import { cn } from "@/lib/utils";
 
 const PlayerCards = ({
   cards,
-  playerName,
   onCardClick,
   className = "",
-  currentPlayer = false,
+  isInverted = false,
+  selectCard = null,
 }) => {
   return (
     <div
@@ -17,13 +14,31 @@ const PlayerCards = ({
         className
       )}
     >
-      <h3 className="text-center">{playerName}</h3>
       {cards.map((card, index) => (
-        <Card key={index} className="card-style">
-          <Button onClick={() => onCardClick(card.id)}>{card.name}</Button>
-        </Card>
+        <div
+          key={card.id}
+          className="board-card"
+          onClick={() => onCardClick(card.id)}
+        >
+          <div
+            className={`cell ${
+              selectCard && selectCard === card.id ? "highlight" : ""
+            }`}
+          >
+            <div className="cell">
+              <img
+                src={`/images/cards/${card.name}.jpg`}
+                alt={card.name}
+                style={{
+                  width: "210px",
+                  height: "115px",
+                  transform: isInverted ? "rotate(180deg)" : "none",
+                }}
+              />
+            </div>
+          </div>
+        </div>
       ))}
-      {currentPlayer && <h3 style={{fontSize: '2rem', color: 'green'}}>SEU TURNO</h3>}
     </div>
   );
 };
