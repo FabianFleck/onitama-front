@@ -1,8 +1,8 @@
 import React from "react";
 import Cell from "./cell";
-import "./play.css"
+import "./play.css";
 
-const Board = ({ board, onCellClick, color}) => {
+const Board = ({ board, onCellClick, color, result }) => {
   return (
     <div className="body">
       <div className="board">
@@ -12,7 +12,9 @@ const Board = ({ board, onCellClick, color}) => {
               key={`${rowIndex}-${cellIndex}`}
               value={cell}
               onClick={() => onCellClick(cell.line, cell.column)}
-              isClickable={cell.color === color && cell.state || cell.highlight}
+              isClickable={
+                ((cell.color === color && cell.state) || cell.highlight) && result === "OPEN"
+              }
             />
           ))
         )}

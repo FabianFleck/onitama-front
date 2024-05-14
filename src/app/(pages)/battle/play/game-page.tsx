@@ -22,6 +22,7 @@ const GamePage = () => {
   const [board, setBoard] = useState([]);
   const [session, setSession] = useState(null);
   const [game, setGame] = useState(null);
+  const [result, setResult] = useState(null);
 
   // YOUR PLAYER
   const [playerColor, setPlayerColor] = useState(null);
@@ -39,7 +40,7 @@ const GamePage = () => {
       setInitParts(yourPlayer);
       if (yourPlayer.card1) {
         setYourCards([yourPlayer.card1, yourPlayer.card2]);
-        setTableCard(game.tableCard)
+        setTableCard(game.tableCard);
       }
     }
   }, [yourPlayer]);
@@ -55,8 +56,7 @@ const GamePage = () => {
 
   useEffect(() => {
     if (game) {
-      console.log("game:", game);
-
+      console.log(game)
       const currentPlayer = [game.player1, game.player2].find(
         (p) => p && p.username === session.id
       );
@@ -71,6 +71,7 @@ const GamePage = () => {
       if (opponentPlayer) {
         setOpponentPlayer(opponentPlayer);
       }
+      setResult(game.result);
     }
   }, [game]);
 
@@ -193,6 +194,9 @@ const GamePage = () => {
           cardId,
         },
       });
+      if (response) {
+        setSelectCard(null);
+      }
     } catch (error) {
       alert(error.response.data.errors[0]);
     }
@@ -253,7 +257,6 @@ const GamePage = () => {
           battleId: battleId,
         },
       });
-      alert("Cartas distribuidas!");
     } catch (error) {
       console.log(error);
       alert(error.response.data.errors[0]);
@@ -279,7 +282,6 @@ const GamePage = () => {
         },
         onmessage(event) {
           const response = JSON.parse(event.data);
-          
           if (response) {
             setGame(response);
           }
@@ -307,18 +309,24 @@ const GamePage = () => {
           board={board}
           onCellClick={handleCellClick}
           color={playerColor}
+          result={result}
         />
         {yourCards && (
           <PlayerCards
             cards={yourCards}
             playerName={yourPlayer.name}
             onCardClick={handleCardClick}
-            currentPlayer={game.currentPlayer === playerColor}
+            currentPlayer={game.currentPlayer === playerColor && result === "OPEN"}
           />
+        )}
+        {result && result != "OPEN" && (
+          <h1 style={{ fontSize: "2rem", color: `${result === playerColor ? 'green' : 'red'}`, textAlign: "center" }}>
+            {result === playerColor ? "VITÓRIA" : "DERROTA"}
+          </h1>
         )}
       </div>
       <div className="col-span-2 flex items-center">
-        {yourPlayer && opponentPlayer && !game.tableCard ? (
+        {!tableCard && yourPlayer && opponentPlayer ? (
           <h1>
             <Button onClick={() => cardDistribuite()}>Dar as cartas</Button>
           </h1>
