@@ -325,12 +325,10 @@ const GamePage = () => {
         )}
       </div>
       <div className="col-span-2 flex items-center">
-        {!tableCard && yourPlayer && opponentPlayer ? (
+        {!tableCard && yourPlayer && opponentPlayer && (
           <h1>
             <Button onClick={() => cardDistribuite()}>Dar as cartas</Button>
           </h1>
-        ) : (
-          <h1></h1>
         )}
         {tableCard && (
           <PlayerCards

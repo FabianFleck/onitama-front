@@ -15,6 +15,7 @@ const Board = ({ board, onCellClick, color, result }) => {
               isClickable={
                 ((cell.color === color && cell.state) || cell.highlight) && result === "OPEN"
               }
+              isInverted={cell.color != color && cell.state}
             />
           ))
         )}
